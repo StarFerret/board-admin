@@ -21,3 +21,4 @@ dist/
 *.p8
 *.key
 *.secret
+*.keychain-db

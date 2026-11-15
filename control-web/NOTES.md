@@ -26,6 +26,7 @@ Rules for this file are in the root `AGENTS.md`, section 6.
 
 ## Log
 
+- 2026-11-15 — Sign in screen shows `meta.sign_in_options` as buttons, and shows `meta.sign_in_error` once after a sign in that left Control fails. Verified: build, and screenshots at 1280 and 390 against a scratch Control.
 - 2026-11-15 — Control's saved sign-in token and the model event use the StarFerret names. Admins sign in again. Verified with `npm run build` and a scratch Control on port 7421: creating an admin set the `starferret_control` cookie and `starferret_control_token`, then Overview loaded.
 - 2026-11-14 — Models page shows each download with a progress bar, plain step words, and bytes; polls every 1.5 s while one runs and every 10 s otherwise, and refreshes the list when one finishes. Verified in the browser against a fake Ollama, at desktop width and 390px (no sideways scroll), across a reload mid download.
 - 2026-11-14 — Create admin form sends `?setup=<token>` and strips it from the address bar; from another machine without it, shows "Finish setup on the Mac". Verified: `npm run build`; both screens seen in the browser at the LAN address. Not clicked: submitting the form.

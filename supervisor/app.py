@@ -8,15 +8,20 @@ import secrets
 import threading
 from functools import wraps
 
-from flask import Flask, jsonify, request, send_from_directory
+from urllib.parse import quote, unquote
 
-from . import apps, capacity, health, metrics, models, people, process_board, store, updater, usage
+from flask import Flask, jsonify, redirect, request, send_from_directory
+
+from . import apps, capacity, extensions, health, metrics, models, people, process_board, store, updater, usage
 from .paths import CONTROL_WEB_DIST, DEFAULT_BOARD_PORT, DEFAULT_CONTROL_PORT, LOCAL_KEY_PATH, SETUP_TOKEN_PATH, ensure_dirs
 
 # Control SPA is same-origin with this API; nothing in the browser calls 7411 from elsewhere.
 app = Flask(__name__, static_folder=None)
 
 COOKIE = "starferret_control"
+# Carries one message from a failed sign in back to the sign in screen. A cookie, not a
+# query parameter, so a link from somewhere else cannot put its own words on that screen.
+NOTICE_COOKIE = "starferret_sign_in_notice"
 ensure_dirs()
 store.init_db()
 _bootstrap_lock = threading.Lock()
@@ -107,7 +112,8 @@ def control_health():
 def control_meta():
     user = _current_user()
     board_port = int(os.environ.get("PORT") or os.environ.get("BOARD_PORT") or DEFAULT_BOARD_PORT)
-    return jsonify(
+    notice = unquote(request.cookies.get(NOTICE_COOKIE) or "")[:300]
+    resp = jsonify(
         {
             **store.export_meta(),
             "user": user,
@@ -115,8 +121,26 @@ def control_meta():
             "board_port": board_port,
             # True when the first admin can be made from this browser without the setup link.
             "setup_local": _request_is_local(),
+            # Extra sign in buttons from extensions (see extensions.py). Empty without any.
+            "sign_in_options": [] if user else EXTENSIONS.sign_in_options(),
+            # Why the last sign in through an extension failed, shown once.
+            "sign_in_error": "" if user else notice,
         }
     )
+    if notice:
+        resp.delete_cookie(NOTICE_COOKIE)
+    return resp
+
+
+def _set_session_cookie(resp, session: dict):
+    resp.set_cookie(
+        COOKIE,
+        session["token"],
+        httponly=True,
+        samesite="Lax",
+        max_age=14 * 24 * 3600,
+    )
+    return resp
 
 
 def _auth_response(user: dict, session: dict):
@@ -127,14 +151,19 @@ def _auth_response(user: dict, session: dict):
             "expires_at": session["expires_at"],
         }
     )
-    resp.set_cookie(
-        COOKIE,
-        session["token"],
-        httponly=True,
-        samesite="Lax",
-        max_age=14 * 24 * 3600,
-    )
+    return _set_session_cookie(resp, session)
+
+
+def _fail_sign_in(message: str):
+    """Send the browser back to the sign in screen with a plain reason (used by extensions)."""
+    resp = redirect("/")
+    resp.set_cookie(NOTICE_COOKIE, quote((message or "")[:300]), max_age=120, httponly=True, samesite="Lax")
     return resp
+
+
+def _start_session(resp, user: dict):
+    """Sign ``user`` in on ``resp`` (used by extensions, e.g. after a redirect)."""
+    return _set_session_cookie(resp, store.create_session(user["id"]))
 
 
 _LOCAL_NAMES = {"127.0.0.1", "::1", "::ffff:127.0.0.1", "localhost"}
@@ -532,6 +561,11 @@ def spa_catch_all(rest: str):
     if rest and candidate.is_file():
         return send_from_directory(CONTROL_WEB_DIST, rest)
     return _spa_index()
+
+
+# Optional extensions (extensions.py). Loaded after Control's own routes; none by default.
+EXTENSIONS = extensions.ExtensionContext(app, store, require_auth, _current_user, _start_session, _fail_sign_in)
+extensions.load(EXTENSIONS)
 
 
 def create_app() -> Flask:

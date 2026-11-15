@@ -27,6 +27,7 @@ the Board on 7410 no longer proxies admin APIs.
 | `process_board.py` | Start, stop, and probe a Board process the supervisor launched |
 | `store.py` | SQLite at `data/control.db`: users, sessions, settings, app state |
 | `paths.py` | All paths. Add new paths here, never hardcode them elsewhere. |
+| `extensions.py` | Optional extensions: modules named in `STARFERRET_EXTENSIONS` add routes and sign in buttons through `ExtensionContext`. None by default. |
 
 ## Rules
 
@@ -58,14 +59,18 @@ the Board on 7410 no longer proxies admin APIs.
 9. The Compose project prefix is `starferret-`. A container started
    under an older prefix is not picked up. Stop it by hand in Docker.
 
-10. **Metrics use only what ships with macOS** (`ps`, `vm_stat`, `sysctl`,
+10. **Extensions are optional.** Control must work the same with none
+    loaded. Keep `ExtensionContext` small and backward compatible: forks and
+    add ons depend on it. Never check for an extension to unlock or hide a
+    feature that lives in this repo.
+11. **Metrics use only what ships with macOS** (`ps`, `vm_stat`, `sysctl`,
     `ioreg`, `system_profiler`). No sudo, no `powermetrics`, no `psutil`.
-11. **Read other apps' databases read only** (`mode=ro`), as `people.py` does.
+12. **Read other apps' databases read only** (`mode=ro`), as `people.py` does.
     Control never writes to `board.db` or another app's database.
-12. **Compose apps get secrets from `_env_file`** (`data/stack/env/<id>.env`),
+13. **Compose apps get secrets from `_env_file`** (`data/stack/env/<id>.env`),
     listed under `secrets:` in the manifest. Never put a secret in a Compose
     file and never return one from a route.
-13. **"Docker installed" is not "Docker running".** Use `docker_running()` and
+14. **"Docker installed" is not "Docker running".** Use `docker_running()` and
     `docker_state()["message"]` for anything the user sees.
 
 ## Testing without touching a running copy

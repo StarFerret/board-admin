@@ -45,6 +45,8 @@ export default function ControlLayout() {
   const [setupToken] = useState(takeSetupToken);
   const [meta, setMeta] = useState(null);
   const [error, setError] = useState("");
+  // Why a sign in through an extension (a company login) failed. Control sends it once.
+  const [signInError, setSignInError] = useState("");
   const [username, setUsername] = useState("admin");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -55,6 +57,7 @@ export default function ControlLayout() {
     setError("");
     try {
       const next = await getControlMeta();
+      if (next.sign_in_error) setSignInError(String(next.sign_in_error).slice(0, 300));
       setMeta(next);
     } catch (err) {
       setMeta({
@@ -190,11 +193,20 @@ export default function ControlLayout() {
                   autoComplete={creating ? "new-password" : "current-password"}
                 />
               </label>
-              {error && <p className="text-sm text-destructive">{error}</p>}
+              {(error || signInError) && <p className="text-sm text-destructive">{error || signInError}</p>}
               <Button className="w-full" disabled={busy || password.length < 8}>
                 {busy ? "Working…" : creating ? (resetMode ? "Reset and sign in" : "Create admin") : "Sign in"}
               </Button>
             </form>
+            {!creating && meta.sign_in_options?.length > 0 && (
+              <div className="mt-4 space-y-2 border-t pt-4">
+                {meta.sign_in_options.map((option) => (
+                  <Button key={option.id} asChild variant="outline" className="h-11 w-full">
+                    <a href={option.url}>{option.label}</a>
+                  </Button>
+                ))}
+              </div>
+            )}
             {!meta.bootstrap_needed && (
               <div className="mt-4 space-y-2 border-t pt-4 text-xs text-muted-foreground">
                 <p>Forgot the password? On this Mac you can reset the local admin.</p>
