@@ -1,0 +1,14 @@
+id: librechat
+name: LibreChat
+description: Chat for everyone in the company. Each person signs in and keeps their own conversations.
+category: Chat
+status: ready
+homepage: https://www.librechat.ai
+ports:
+  - 3080
+depends:
+  - ollama
+health: http://127.0.0.1:3080/
+deep_link: true
+launchd: com.starferret.librechat
+note: Set up by the StarFerret installer. No Docker.

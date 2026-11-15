@@ -1,0 +1,13 @@
+id: board
+name: Board
+description: Named agents and shared folders on this Mac. The place people work every day.
+category: Core
+status: ready
+ports:
+  - 7410
+depends:
+  - ollama
+health: http://127.0.0.1:7410/api/settings/host
+deep_link: true
+launchd: com.starferret.board
+note: Start, stop, and health from this page. No Docker.

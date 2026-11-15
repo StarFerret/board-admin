@@ -1,0 +1,14 @@
+id: n8n
+name: n8n
+description: Build automations by connecting boxes. Use it to pass work between your tools and the local model.
+category: Automation
+status: ready
+homepage: https://n8n.io
+compose: stacks/n8n.yml
+ports:
+  - 5678
+depends: []
+health: http://127.0.0.1:5678/healthz
+deep_link: true
+launchd: com.starferret.n8n
+note: Set up by the StarFerret installer. No Docker.

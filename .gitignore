@@ -1,0 +1,23 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+data/
+web/node_modules/
+web/dist/
+control-web/node_modules/
+control-web/dist/
+*.db
+.DS_Store
+*.log
+dist/
+
+# Secrets and signing material. Never commit these.
+.env
+.env.*
+*.pem
+*.p12
+*.p8
+*.key
+*.secret
