@@ -12,14 +12,18 @@ macOS asks testers to confirm it once in System Settings. The steps are in
 of the release notes. Once signed, releases carry `StarFerret.dmg`, which opens with
 a double click.
 
-**One Terminal line (for IT people).** `curl` downloads the installer from the latest
-release and `bash` runs it. Same steps, printed in the window:
+**One Terminal line (for IT people).** `curl` downloads the installer and `bash` runs
+it. Same steps, printed in the window. Until the first release is published from this
+repo, take the installer from `main`:
 
 ```bash
-curl -fsSL https://github.com/StarFerret/board-admin/releases/latest/download/install-starferret.sh | bash
+curl -fsSL https://raw.githubusercontent.com/StarFerret/board-admin/main/installer/macos/install-starferret.sh | bash
 ```
 
-Neither works until the first release is published from this repo.
+With no release, step 2 downloads the source instead, so the Mac needs Node.js to build
+the web pages. After the first release, use
+`curl -fsSL https://github.com/StarFerret/board-admin/releases/latest/download/install-starferret.sh | bash`,
+which needs no Node.js. The app (`.dmg`) only exists once a release does.
 
 **From a checkout:**
 

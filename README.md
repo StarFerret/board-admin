@@ -66,8 +66,15 @@ in System Settings. The steps are in
 **2. One Terminal line (for IT people).** Same steps, printed in Terminal:
 
 ```bash
-curl -fsSL https://github.com/StarFerret/board-admin/releases/latest/download/install-starferret.sh | bash
+curl -fsSL https://raw.githubusercontent.com/StarFerret/board-admin/main/installer/macos/install-starferret.sh | bash
 ```
+
+No release has been published from this repo yet, so this runs the installer
+from `main` and it downloads the source. Like a clone, that needs Node.js
+installed, because the source has no prebuilt web pages. Once the first
+release is out, the line becomes
+`curl -fsSL https://github.com/StarFerret/board-admin/releases/latest/download/install-starferret.sh | bash`
+and Node.js is no longer needed.
 
 **3. From a clone of this repo.**
 
